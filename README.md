@@ -28,4 +28,6 @@
 
 ## Overview
 
+The implementation uses a file on disk to represent the stored data. All filter operations are performed on the contents of the file read from disk.
+
 I chose Python to implement the assignment because Python 3's [fileinput API](https://docs.python.org/3/library/fileinput.html) can read from both input file if as a command line argument, but can also default to standard input without any change in code. In addition, Python ecosystem supports all the tools and libraries required to write good quality code in that language.
