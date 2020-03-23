@@ -53,7 +53,7 @@ class Criteria(object):
             order: order criteria
             filter: filter criteria
         """
-        self.select = set(select or [])
+        self.select = select or []
         self.order = order or []
         self.filter_list = filter_list or []
 

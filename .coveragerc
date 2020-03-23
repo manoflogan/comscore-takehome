@@ -1,0 +1,11 @@
+[paths]
+source=*.py
+
+[run]
+omit=
+    env/**
+    *_test.py
+
+[html]
+directory=test_coverage_report
+title="Comscore Assignment Coverage Report"
