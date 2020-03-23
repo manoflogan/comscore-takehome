@@ -55,14 +55,14 @@ class Criteria(object):
         """
         self.select = set(select or [])
         self.order = order or []
-        self.filter_list = set(filter_list or [])
+        self.filter_list = filter_list or []
 
     def __call__(self,
                  csv_generator: typing.Generator[
                      typing.List[str], typing.List[str],
                      typing.List[str]]) -> typing.List[str]:
         """Applies the criteria to filter a row by criteria."""
-        # First order by keys.
+        # First filter by keys if any
         if self.filter_list:
             filtered_dict_combo = dict([
                 (row_filter[0], row_filter[1])
@@ -80,7 +80,7 @@ class Criteria(object):
             # No filter so use the entire row
             filtered_rows = [row for row in csv_generator]
 
-        # If ordering exists, then it needs to be ordered
+        # Order if available
         if self.order:
             filtered_rows = sorted(filtered_rows,
                                    key=operator.itemgetter(*self.order))
@@ -104,10 +104,9 @@ def query_datastore(select: typing.List[str], order: typing.List[str] = None,
     with open(constants.OUTPUT_FILE_PATH, 'r', encoding='utf-8') as data_file:
         csv_reader = csv.DictReader(data_file, delimiter='|')
         criteria = Criteria(select, order, filter_list)
-        filtered_output = criteria(csv_reader)
-        import pdb; pdb.set_trace()
-        print(filtered_output)
-        return filtered_output
+        filtered_outputs = criteria(csv_reader)
+        return [', '.join(filtered_output)
+                for filtered_output in filtered_outputs]
 
 
 if __name__ == '__main__':
@@ -120,4 +119,4 @@ if __name__ == '__main__':
                         help='Fields to be filtered by', required=False)
     (arguments, _) = parser.parse_known_args(sys.argv[1:])
 
-    query_datastore(arguments.s, arguments.o, arguments.f)
+    print (query_datastore(arguments.s, arguments.o, arguments.f))
