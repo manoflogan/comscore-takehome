@@ -6,6 +6,7 @@ The query tool accepts command line arguments representing the query parameters
 import argparse
 import csv
 import operator
+import os
 import sys
 import typing
 
@@ -38,7 +39,7 @@ class DelimiterSeparatedInput(object):
                 'The value {} can not be parsed'.format(values))
 
 
-class Criteria(object):
+class Query(object):
     """An instance of this class encapsulates all the selection criteria to
     query the underlying data.
     """
@@ -57,40 +58,52 @@ class Criteria(object):
         self.order = order or []
         self.filter_list = filter_list or []
 
-    def __call__(self,
-                 csv_generator: typing.Generator[
-                     typing.List[str], typing.List[str],
-                     typing.List[str]]) -> typing.List[str]:
+    def __call__(self, root_dir: str) -> typing.List[str]:
         """Applies the criteria to filter a row by criteria."""
         # First filter by keys if any
+        import pdb; pdb.set_trace()
         if self.filter_list:
-            filtered_dict_combo = dict([
+            filtered_combo = [
                 (row_filter[0], row_filter[1])
-                for row_filter in (f.split('=') for f in self.filter_list)])
-            filtered_rows = []
-            for row in csv_generator:
-                filter_count = 0
-                for filter_key in filtered_dict_combo:
-                    if row[filter_key] == filtered_dict_combo[filter_key]:
-                        filter_count += 1
-                # If all filters match, then all filter
-                if filter_count == len(filtered_dict_combo):
-                    filtered_rows.append(row)
+                for row_filter in (f.split('=') for f in self.filter_list)]
+            data_files = []
+            for data_file in os.listdir(root_dir):
+                for (_, filter_value) in filtered_combo:
+                    if filter_value in data_file:
+                        data_files.append(data_file)
         else:
-            # No filter so use the entire row
-            filtered_rows = [row for row in csv_generator]
+            data_files = [data_file for data_file in os.listdir(root_dir)
+                         if data_file.endswith('.csv')]
+        # Read files
+        filtered_rows = []
+        import pdb; pdb.set_trace()
+        for data_file in data_files:
+            with open(os.path.join(constants.OUTPUT_DIRECTORY, data_file), 'r',
+                      encoding='utf-8') as data_file:
+                csv_reader = csv.DictReader(data_file, delimiter='|')
+                for row in csv_reader:
+                    filtered_rows.append(row)
 
-        # Order if available
+
+        # Order by keys
+        pdb.set_trace()
         if self.order:
             filtered_rows = sorted(filtered_rows,
                                    key=operator.itemgetter(*self.order))
 
-        output_rows = []
+        pdb.set_trace()
+        # Select list
         if self.select:
+            output_rows = []
             for filtered_row in filtered_rows:
                 output_rows.append(
-                    [filtered_row[select_column]
-                     for select_column in self.select])
+                    ', '.join([filtered_row[select_column]
+                               for select_column in self.select]))
+        else:
+            output_rows = []
+            for filtered_row in filtered_rows:
+                output_rows.append(', '.join([filtered_row[column]
+                                              for column in filtered_row]))
         return output_rows
 
     def __repr__(self):
@@ -101,12 +114,8 @@ class Criteria(object):
 def query_datastore(select: typing.List[str], order: typing.List[str] = None,
                     filter_list: typing.List[str] = None):
     """Query the data stores by selection criteria."""
-    with open(constants.OUTPUT_FILE_PATH, 'r', encoding='utf-8') as data_file:
-        csv_reader = csv.DictReader(data_file, delimiter='|')
-        criteria = Criteria(select, order, filter_list)
-        filtered_outputs = criteria(csv_reader)
-        return [', '.join(filtered_output)
-                for filtered_output in filtered_outputs]
+    query = Query(select, order, filter_list)
+    return query(constants.OUTPUT_DIRECTORY)
 
 
 if __name__ == '__main__':
@@ -119,4 +128,4 @@ if __name__ == '__main__':
                         help='Fields to be filtered by', required=False)
     (arguments, _) = parser.parse_known_args(sys.argv[1:])
 
-    print (query_datastore(arguments.s, arguments.o, arguments.f))
+    print(query_datastore(arguments.s, arguments.o, arguments.f))
