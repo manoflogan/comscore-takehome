@@ -58,25 +58,32 @@ class Query(object):
         self.order = order or []
         self.filter_list = filter_list or []
 
-    def __call__(self, root_dir: str) -> typing.List[str]:
-        """Applies the criteria to filter a row by criteria."""
+    def __call__(self, root_dir: str) -> typing.List[str]:  # noqa: C901
+        """Applies the criteria to filter a row by criteria.
+
+        The implementation executes the following steps:
+
+        1. Filters all files by data time
+        """
         # First filter by keys if any
-        import pdb; pdb.set_trace()
         if self.filter_list:
             filtered_combo = [
-                (row_filter[0], row_filter[1])
+                row_filter[1]
                 for row_filter in (f.split('=') for f in self.filter_list)]
             data_files = []
             for data_file in os.listdir(root_dir):
-                for (_, filter_value) in filtered_combo:
+                filter_count = 0
+                for filter_value in filtered_combo:
                     if filter_value in data_file:
-                        data_files.append(data_file)
+                        filter_count += 1
+                if filter_count == len(filtered_combo):
+                    data_files.append(data_file)
         else:
+            # Need to ignore hidden files.
             data_files = [data_file for data_file in os.listdir(root_dir)
-                         if data_file.endswith('.csv')]
+                          if not data_file.startswith('.')]
         # Read files
         filtered_rows = []
-        import pdb; pdb.set_trace()
         for data_file in data_files:
             with open(os.path.join(constants.OUTPUT_DIRECTORY, data_file), 'r',
                       encoding='utf-8') as data_file:
@@ -84,14 +91,11 @@ class Query(object):
                 for row in csv_reader:
                     filtered_rows.append(row)
 
-
         # Order by keys
-        pdb.set_trace()
         if self.order:
             filtered_rows = sorted(filtered_rows,
                                    key=operator.itemgetter(*self.order))
 
-        pdb.set_trace()
         # Select list
         if self.select:
             output_rows = []
