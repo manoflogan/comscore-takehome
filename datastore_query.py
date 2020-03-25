@@ -140,4 +140,6 @@ if __name__ == '__main__':
                         help='Fields to be filtered by', required=False)
     (arguments, _) = parser.parse_known_args(sys.argv[1:])
 
-    print(query_datastore(arguments.s, arguments.o, arguments.f))
+    output_rows = query_datastore(arguments.s, arguments.o, arguments.f)
+    for output in output_rows:
+        print (output)
