@@ -133,7 +133,7 @@ def query_datastore(select: typing.List[str] = None,
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', type=DelimiterSeparatedInput(str),
-                        help='Fields to be selected', required=True)
+                        help='Fields to be selected', required=False)
     parser.add_argument('-o', type=DelimiterSeparatedInput(str),
                         help='Fields to be ordered', required=False)
     parser.add_argument('-f', type=DelimiterSeparatedInput(str),
