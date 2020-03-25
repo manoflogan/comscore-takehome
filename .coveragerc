@@ -6,6 +6,10 @@ omit=
     env/**
     *_test.py
 
+[report]
+exclude_lines =
+      if __name__ == __main__:
+
 [html]
 directory=test_coverage_report
 title="Comscore Assignment Coverage Report"
