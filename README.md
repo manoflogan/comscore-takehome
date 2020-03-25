@@ -1,4 +1,4 @@
-# Comscore Coding Exercise
+# Comscore Coding Exercise [![Build Status](https://travis-ci.org/manoflogan/comscore-takehome.svg?branch=master)](https://travis-ci.org/manoflogan/comscore-takehome)
 
 ### Table of Contents
 
