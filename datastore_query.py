@@ -67,12 +67,12 @@ class Query(object):
         """
         # First filter by keys if any
         if self.filter_list:
-            filtered_combo = [
+            filtered_combo: typing.List[str] = [
                 row_filter[1]
                 for row_filter in (f.split('=') for f in self.filter_list)]
-            data_files = []
+            data_files: typing.List[str] = []
             for data_file in os.listdir(root_dir):
-                filter_count = 0
+                filter_count: int = 0
                 for filter_value in filtered_combo:
                     if filter_value in data_file:
                         filter_count += 1
@@ -83,7 +83,7 @@ class Query(object):
             data_files = [data_file for data_file in os.listdir(root_dir)
                           if not data_file.startswith('.')]
         # Read files
-        filtered_rows = []
+        filtered_rows: typing.List[typing.Dict[str, str]] = []
         for data_file in data_files:
             with open(os.path.join(constants.OUTPUT_DIRECTORY, data_file), 'r',
                       encoding='utf-8') as data_file:
