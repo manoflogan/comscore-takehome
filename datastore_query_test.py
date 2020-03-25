@@ -35,7 +35,7 @@ class TestDelimiterSeparatedInput(object):
 def datastore():
     return os.path.normpath(
         os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                     'datastore.csv'))
+                     'datastore.csv'))
 
 
 @pytest.fixture()
@@ -93,7 +93,7 @@ class TestQuery(object):
                 csv_writer = csv.DictReader(open_file, delimiter='|')
                 sorted_rows = sorted(
                     [row for row in csv_writer],
-                     key=operator.itemgetter(*order_criteria))
+                    key=operator.itemgetter(*order_criteria))
                 expected_rows = []
                 for sorted_row in sorted_rows:
                     expected_rows.append(
@@ -114,7 +114,8 @@ class TestQuery(object):
         # Copy file to allow filtering
         filter_file_arr = datastore.split('.')
         output_file = '{}_{}.{}'.format(
-            filter_file_arr[0], filter_criteria.split('=')[-1], filter_file_arr[-1])
+            filter_file_arr[0], filter_criteria.split('=')[-1],
+            filter_file_arr[-1])
         output_data = [
             '"STB"|"TITLE"|"PROVIDER"|"DATE"|"REV"|"VIEW_TIME"\n',
             '"stb1"|"the matrix"|"warner bros"|"2014-04-01"|"4.00"|"1:30"\n'
@@ -125,13 +126,13 @@ class TestQuery(object):
         try:
             with mock.patch(
                     'os.listdir',
-                    side_effect=lambda root_dir: [output_file]) as mock_list_dir:
+                    side_effect=lambda root: [output_file]) as mock_list_dir:
                 actual_rows = query(root_directory)
                 with open(datastore, 'r') as open_file:
                     csv_writer = csv.DictReader(open_file, delimiter='|')
                     sorted_rows = sorted(
                         [row for row in csv_writer],
-                         key=operator.itemgetter(*order_criteria))
+                        key=operator.itemgetter(*order_criteria))
                 expected_rows = []
                 filter_queries = [
                     (filter_query[0], filter_query[1])
@@ -142,8 +143,28 @@ class TestQuery(object):
                          filter_value) in filter_queries:
                         if sorted_row.get(filter_column, '') == filter_value:
                             expected_rows.append(
-                                ', '.join([sorted_row.get(select_column, '')
-                                           for select_column in select_criteria]))
+                                ', '.join(
+                                    [sorted_row.get(select_column, '')
+                                     for select_column in select_criteria]))
                 assert actual_rows == expected_rows
+                assert mock_list_dir.call_count == 1
+                assert mock_list_dir.call_args[0][0] == root_directory
         finally:
             os.remove(output_file)
+
+
+@mock.patch('datastore_query.Query')
+def test_query_data_store(mock_query_object):
+    expected_output = ['test output']
+    mocked_func = mock.MagicMock(return_value=expected_output)
+    mock_query_object.return_value = mocked_func
+    select_criteria = ['TITLE', 'PROVIDER', 'REV']
+    order_criteria = ['REV']
+    filter_criteria = 'DATE=2014-04-01'
+    actual_output = datastore_query.query_datastore(select_criteria,
+                                                    order_criteria,
+                                                    filter_criteria)
+    assert actual_output == expected_output
+    assert mock_query_object.call_count == 1
+    assert mocked_func.call_count == 1
+    assert mocked_func.call_args[0][0] == constants.OUTPUT_DIRECTORY

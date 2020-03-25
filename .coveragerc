@@ -8,6 +8,7 @@ omit=
 
 [report]
 exclude_lines =
+      def __repr__
       if __name__ == __main__:
 
 [html]

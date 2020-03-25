@@ -124,7 +124,7 @@ class Query(object):
 
 def query_datastore(select: typing.List[str] = None,
                     order: typing.List[str] = None,
-                    filter_list: typing.List[str] = None):
+                    filter_list: typing.List[str] = None) -> typing.List[str]:
     """Query the data stores by selection criteria."""
     query = Query(select, order, filter_list)
     return query(constants.OUTPUT_DIRECTORY)
