@@ -29,18 +29,17 @@ FILE_HEADER: str = None
 def store_data_to_file():
     """The implementation does the following
 
-    1. Creates a directory output directory if does not exist.
+    1. Creates a directory output directory if it does not exist.
     2. Reads the header if it not already parsed; if the header has not been
        parsed, then a file is created in write mode such a file name is a
-       combination of "stb", "title,", and "date"
+       combination of "stb", "title,", and "date" and the header is written to
+       a file
     3. The contents of the datastore are written to a file; if the file already
        exists, then the contents are overwritten.
     """
-
     # Step 1: Create a directory if it does not exist.
     os.makedirs(constants.OUTPUT_DIRECTORY, exist_ok=True)
     is_header_parsed: bool = False
-
     for content in fileinput.input():
         content = content.replace('\n', '')
         if not is_header_parsed:

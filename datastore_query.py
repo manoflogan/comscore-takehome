@@ -35,7 +35,7 @@ class DelimiterSeparatedInput(object):
             return [self.item_type(val)
                     for val in values.split(self.separator)]
         except Exception:
-            raise argparse.ArgumentError(
+            raise argparse.ArgumentTypeError(
                 'The value {} can not be parsed'.format(values))
 
 
@@ -44,7 +44,7 @@ class Query(object):
     query the underlying data.
     """
 
-    def __init__(self, select: typing.List[str],
+    def __init__(self, select: typing.List[str] = None,
                  order: typing.List[str] = None,
                  filter_list: typing.List[str] = None):
         """Initialises the criteria.
@@ -63,16 +63,21 @@ class Query(object):
 
         The implementation executes the following steps:
 
-        1. Filters all files by data time
+        1. Filters all files by filter list if provided; If it is not available,
+           then the all the files are available for parsing
+
+        2. The contents of all the filtered are read and stored to a list
+
+        3. The contents are sorted by the keys provided by order
         """
-        # First filter by keys if any
+        # Step 1: Filter files
         if self.filter_list:
-            filtered_combo = [
+            filtered_combo: typing.List[str] = [
                 row_filter[1]
                 for row_filter in (f.split('=') for f in self.filter_list)]
-            data_files = []
+            data_files: typing.List[str] = []
             for data_file in os.listdir(root_dir):
-                filter_count = 0
+                filter_count: int = 0
                 for filter_value in filtered_combo:
                     if filter_value in data_file:
                         filter_count += 1
@@ -82,8 +87,9 @@ class Query(object):
             # Need to ignore hidden files.
             data_files = [data_file for data_file in os.listdir(root_dir)
                           if not data_file.startswith('.')]
-        # Read files
-        filtered_rows = []
+
+        # Step 2 : Read files' content
+        filtered_rows: typing.List[typing.Dict[str, str]] = []
         for data_file in data_files:
             with open(os.path.join(constants.OUTPUT_DIRECTORY, data_file), 'r',
                       encoding='utf-8') as data_file:
@@ -91,7 +97,7 @@ class Query(object):
                 for row in csv_reader:
                     filtered_rows.append(row)
 
-        # Order by keys
+        # Step 3 : Order by keys
         if self.order:
             filtered_rows = sorted(filtered_rows,
                                    key=operator.itemgetter(*self.order))
@@ -101,13 +107,14 @@ class Query(object):
             output_rows = []
             for filtered_row in filtered_rows:
                 output_rows.append(
-                    ', '.join([filtered_row[select_column]
+                    ', '.join([filtered_row.get(select_column, '')
                                for select_column in self.select]))
         else:
             output_rows = []
             for filtered_row in filtered_rows:
-                output_rows.append(', '.join([filtered_row[column]
+                output_rows.append(', '.join([filtered_row.get(column, '')
                                               for column in filtered_row]))
+
         return output_rows
 
     def __repr__(self):
@@ -115,8 +122,9 @@ class Query(object):
                                self.__dict__)
 
 
-def query_datastore(select: typing.List[str], order: typing.List[str] = None,
-                    filter_list: typing.List[str] = None):
+def query_datastore(select: typing.List[str] = None,
+                    order: typing.List[str] = None,
+                    filter_list: typing.List[str] = None) -> typing.List[str]:
     """Query the data stores by selection criteria."""
     query = Query(select, order, filter_list)
     return query(constants.OUTPUT_DIRECTORY)
