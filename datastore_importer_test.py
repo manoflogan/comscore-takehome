@@ -1,7 +1,6 @@
 from unittest import mock
 
 import os
-import pytest
 import shutil
 import typing
 
@@ -40,6 +39,8 @@ def test_handle_command_line_inputs(mocked_fileinput):
                         continue
                     expected_rows.extend([header_row, line_row])
             assert expected_rows == rows
+            assert mocked_fileinput.call_count == 1
+            assert mock_csv_writer.call_count == 4
     finally:
         shutil.rmtree(constants.OUTPUT_DIRECTORY, ignore_errors=True,
                       onerror=None)
