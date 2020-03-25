@@ -142,4 +142,4 @@ if __name__ == '__main__':
 
     output_rows = query_datastore(arguments.s, arguments.o, arguments.f)
     for output in output_rows:
-        print (output)
+        print(output)

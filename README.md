@@ -18,15 +18,17 @@
 
 * Set up virtualenv with the following command ``virtualenv -p `which python3` env``. Activate the virtual environment using the command `source env/bin/activate`
 
-* Install the python packages required by the project by executing `pipenv install` command. `pipenv` can be installed using
-  1. homebrew usinig the command `brew install pipenv` or
-  2. pip using the command `pip install pipenv`
+* Install `pipenv` using the command `pip install pipenv`
+
+* Install the required project dependencies within the virtual environment with the command `pipenv install`
+
+* Run the command `pytest` to run the unit tests. The code coverage reports will generated and displayed on the console.
 
 ## Execution
 
-* Run the command `python datastore_importer.py < file.txt` or `python datastore_importer.py input.txt` to execute the program.
+* Run the command `python datastore_importer.py < file.txt` or `python datastore_importer.py file.txt` to execute the program.
 
-* Run the command `pytest` to run the unit tests. The code coverage reports will generated and displayed on the console.
+* Run the command `./query.sh <arguments>` to run the query module.
 
 ## Overview
 
