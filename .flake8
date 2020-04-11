@@ -5,5 +5,5 @@ exclude=
     __pycache__,
     env,
     logging.config,
-    input.txt
+    *.csv
 max-complexity=10

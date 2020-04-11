@@ -9,7 +9,6 @@ verify_ssl = true
 pytest = "*"
 flake8 = "*"
 pytest-cov = "*"
-simplejson = "*"
 
 [requires]
 python_version = "3.8"
