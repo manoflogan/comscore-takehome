@@ -25,6 +25,8 @@ logger = logging.getLogger('root')
 # Global variables
 FILE_HEADER: str = None
 
+DATASTORE_DIR: str = 'datastore'
+
 
 def store_data_to_file():
     """The implementation does the following
@@ -38,7 +40,9 @@ def store_data_to_file():
        exists, then the contents are overwritten.
     """
     # Step 1: Create a directory if it does not exist.
-    os.makedirs(constants.OUTPUT_DIRECTORY, exist_ok=True)
+    datastore_directory = os.path.join(constants.OUTPUT_DIRECTORY,
+                                       DATASTORE_DIR)
+    os.makedirs(datastore_directory, exist_ok=True)
     is_header_parsed: bool = False
     for content in fileinput.input():
         content = content.replace('\n', '')
@@ -51,8 +55,9 @@ def store_data_to_file():
         data_set = content.split('|')
         stb, title, _, date, _, _ = data_set
         # Creating the directory per stb, title, and date
-        file_name = constants.OUTPUT_FILE_PATH.format(
-            stb.lower(), title.lower(), date)
+        file_name = os.path.join(
+            datastore_directory,
+            constants.OUTPUT_FILE_NAME.format(stb.lower(), title.lower(), date))
         with open(file_name, 'w',
                   encoding='utf-8') as file_object:
             file_writer = csv.writer(file_object, delimiter='|',
